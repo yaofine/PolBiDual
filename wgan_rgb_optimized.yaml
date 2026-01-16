@@ -1,0 +1,98 @@
+device: 'cuda:1'
+save_dir: runs/wgan_rgb_optimized
+
+debug:
+  log: INFO
+  fast_run: false
+
+strategy: fuse & detect
+
+fuse:
+  dim: 64
+  depth: 6
+  pretrained: 
+
+discriminator:
+  rgb:
+    dim: 64
+    num_layers: 4
+    use_spectral: true
+    use_multi_scale: false
+  gradient:
+    dim: 64
+    num_layers: 4
+    use_spectral: true
+
+detect:
+  model: yolov5x
+  channels: 3
+  pretrained: /home/server/project/LWPI/weights/converted/yolov5x_m3fd_nc6.pth
+
+dataset:
+  name: M3FD
+  root: /media/server/Elements/data/M3FD/valtry
+  color: true
+  normalize_range: [0, 1]
+  
+  detect:
+    hsv: [0.015, 0.7, 0.4]
+    degrees: 0.0
+    translate: 0.1
+    scale: [0.5, 1.5]
+    shear: 0.0
+    perspective: 0.0
+    flipud: 0.0
+    fliplr: 0.5
+    mosaic: 1.0
+    mixup: 0.0
+    copy_paste: 0.0
+
+train:
+  batch_size: 12
+  epochs: 300
+  warmup_epochs: 5
+  joint_epochs: 15
+  num_workers: 8
+  pin_memory: true
+  lr_g: 0.0001
+  lr_d: 0.00005
+  lr_det: 0.01
+  save_period: 1
+  val_period: 1
+  monitor_images: 4
+  img_size: [320, 320]
+  use_amp: true
+  multi_modal: true
+  grayscale: false
+  save_txt: true
+
+loss:
+  structure: 1.0
+  ssim: 0.5
+  
+  adversarial:
+    rgb: 0.01
+    gradient: 0.01
+  
+  detect:
+    box: 0.05
+    cls: 0.3
+    obj: 1.0
+    cls_pw: 1.0
+    obj_pw: 1.0
+    anchor_t: 4.0
+    fl_gamma: 0.0
+
+optimizer:
+  lr_g: 0.0001
+  lr_d: 0.00005
+  weight_decay: 0.0001
+  momentum: 0.937
+
+wgan:
+  n_critic: 3
+  lambda_gp: 10
+
+scheduler:
+  warmup_epochs: [3.0, 5.0]
+  warmup_momentum: 0.8
